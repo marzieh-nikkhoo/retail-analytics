@@ -1,69 +1,46 @@
-#import libraries
-
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 
-#DATA ANALYSIS PYTHON PROJECT-RETAIL
+# retail data analysis project
 
-df=pd.read_csv("retail_data.csv")
+df = pd.read_csv("retail_data.csv")
 
-##sample
+# first look at the data
+print(df.head(20))
+print(df.tail(10))
 
-df.head(20)
+print("shape:", df.shape)
+print("columns:", df.columns.tolist())
+print("dtypes:\n", df.dtypes)
 
-##sample
+# fat content column has messy values like 'LF' and 'low fat'
+# they all mean the same thing so clean them up
+print("before:", df['Item Fat Content'].unique())
 
-df.tail(10)
+df['Item Fat Content'] = df['Item Fat Content'].replace({
+    'LF': 'Low Fat',
+    'low fat': 'Low Fat',
+    'reg': 'Regular'
+})
 
-##size of data
+print("after:", df['Item Fat Content'].unique())
 
-print("size of data",df.shape)
+# calculate the main KPIs
+total_sales = df['Sales'].sum()
+avg_sales = df['Sales'].mean()
+no_items_sold = df['Sales'].count()
+avg_rating = df['Rating'].mean()
 
-##field info
+print(f"\ntotal sales: ${total_sales:,.0f}")
+print(f"average sales: ${avg_sales:,.2f}")
+print(f"items sold: {no_items_sold:,}")
+print(f"average rating: {avg_rating:.2f}")
 
-print("name of column",df.columns)
+# pie chart - sales split by fat content
+sales_by_fat = df.groupby('Item Fat Content')['Sales'].sum()
 
-##data types
-
-print("name of column",df.dtypes)
-
-##data cleaning
-
-print(df['Item Fat Content'].unique())
-df['Item Fat Content']=df['Item Fat Content'].replace({'LF':'Low Fat','low fat':'Low Fat','reg':'Regular'})
-print(df['Item Fat Content'].unique())
-
-##business requirments
-
-###KPI's requirments
-
-#1-total sales
-total_sales=df['Sales'].sum()
-
-#2-average sales
-avg_sales=df['Sales'].mean()
-
-#3-no of item sold
-no_of_item_sold=df['Sales'].count()
- 
-#4-average ratings
-avg_ratings=df['Rating'].mean()
-
-#5_display
-print(f"total sales:${total_sales:,.0f}")
-print(f"average sales:${avg_sales:,.0f}")
-print(f"no of item sold:{no_of_item_sold:,.0f}")
-print(f"average ratings:{avg_ratings:,.0f}")
-
-###CHART's requirments
-
-#1_total sales by fat content
-sales_by_fat=df.groupby('Item Fat Content')['Sales'].sum()
-plt.pie(sales_by_fat,labels= sales_by_fat.index,
-                   autopct='%.1f%%',
-                startangle=90)
-plt.title('Sales by Fat Content')
-plt.axis('equal')
+fig, ax = plt.subplots(figsize=(7, 7))
+ax.pie(sales_by_fat, labels=sales_by_fat.index, autopct='%.1f%%', startangle=90)
+ax.set_title('Total Sales by Fat Content')
+plt.tight_layout()
 plt.show()
